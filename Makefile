@@ -18,4 +18,4 @@ list.o: list.c list.h debug.h
 .PHONY: clean
 
 clean:
-	$(RM) madmin{,.exe} *.o
+	$(RM) $(TARGET){,.exe} *.o

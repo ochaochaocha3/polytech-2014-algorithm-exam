@@ -36,6 +36,8 @@ size_t list_length(list_t* list);
 void list_append(list_t* list, municipality_t* data);
 // リストの先頭のノードを消去する
 void list_delete_head(list_t* list);
+// data と ID が等しい最初のノードを消去する
+void list_delete_matched(list_t* list, municipality_t* data);
 // リストを空にする
 void list_clear(list_t* list);
 // 条件に合う最初の自治体を返す

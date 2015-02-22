@@ -11,12 +11,13 @@
 #include "list.h"
 
 typedef enum command {
-  COMMAND_EXIT,   // 終了
-  COMMAND_APPEND, // 挿入
-  COMMAND_DELETE, // 削除
-  COMMAND_SEARCH, // 探索
-  COMMAND_LIST,   // 一覧
-  COMMAND_TOTAL   // ダミー：総数を知るために使う
+  COMMAND_EXIT,              // 終了
+  COMMAND_APPEND,            // 挿入
+  COMMAND_DELETE,            // 削除
+  COMMAND_SEARCH,            // 探索
+  COMMAND_SEARCH_AND_DELETE, // 探索 & 削除
+  COMMAND_LIST,              // 一覧
+  COMMAND_TOTAL              // ダミー：総数を知るために使う
 } command_t;
 
 typedef enum search_category {
@@ -28,6 +29,13 @@ typedef enum search_category {
   SEARCH_TOTAL         // ダミー：総数を知るために使う
 } search_category_t;
 
+typedef enum search_and_delete_category {
+  SEARCH_AND_DELETE_BACK,    // 戻る
+  SEARCH_AND_DELETE_BY_ID,   // ID で探索
+  SEARCH_AND_DELETE_BY_NAME, // 名称で探索
+  SEARCH_AND_DELETE_TOTAL    // ダミー：総数を知るために使う
+} search_and_delete_category_t;
+
 command_t select_command(void);
 void add_initial_data(list_t* list);
 void print_municipality(municipality_t* value, void** params);
@@ -38,11 +46,17 @@ void append_data(list_t* list);
 void delete_data(list_t* list);
 void search_data(list_t* list);
 search_category_t select_search_category(void);
+void search_and_delete_data(list_t* list);
+search_and_delete_category_t select_search_and_delete_category(void);
 
-void search_by_id(list_t* list);
-void search_by_name(list_t* list);
-void search_by_name_like(list_t* list);
-void search_by_area(list_t* list);
+municipality_t* search_by_id(list_t* list);
+municipality_t* search_by_name(list_t* list);
+int search_by_name_like(list_t* list);
+int search_by_area(list_t* list);
+
+int search_and_delete_by_id(list_t* list);
+int search_and_delete_by_name(list_t* list);
+int confirm_delete(void);
 
 int main(void) {
   list_t list;
@@ -74,6 +88,9 @@ int main(void) {
     case COMMAND_SEARCH:
       search_data(&list);
       break;
+    case COMMAND_SEARCH_AND_DELETE:
+      search_and_delete_data(&list);
+      break;
     default:
       break;
     }
@@ -88,10 +105,11 @@ command_t select_command(void) {
   int command;
 
   printf(
-    "[%d]挿入 [%d]削除 [%d]探索 [%d]一覧 [%d]終了\n",
+    "[%d]挿入 [%d]削除 [%d]探索 [%d]探索 & 削除 [%d]一覧 [%d]終了\n",
     COMMAND_APPEND,
     COMMAND_DELETE,
     COMMAND_SEARCH,
+    COMMAND_SEARCH_AND_DELETE,
     COMMAND_LIST,
     COMMAND_EXIT
   );
@@ -226,7 +244,55 @@ search_category_t select_search_category(void) {
   return (search_category_t)category;
 }
 
-void search_by_id(list_t* list) {
+void search_and_delete_data(list_t* list) {
+  int category;
+
+  NULL_CHECK(list, "search_and_delete_data: list");
+
+  if (list_is_empty(list)) {
+    puts("データが存在しません");
+    return;
+  }
+
+  category = select_search_and_delete_category();
+
+  if (category == SEARCH_AND_DELETE_BACK) {
+    return;
+  }
+
+  switch (category) {
+  case SEARCH_AND_DELETE_BY_ID:
+    search_and_delete_by_id(list);
+    break;
+  case SEARCH_AND_DELETE_BY_NAME:
+    search_and_delete_by_name(list);
+    break;
+  default:
+    break;
+  }
+}
+
+search_and_delete_category_t select_search_and_delete_category(void) {
+  int category;
+
+  printf(
+    "\n[%d]ID [%d]名称 [%d]戻る\n",
+    SEARCH_AND_DELETE_BY_ID, SEARCH_AND_DELETE_BY_NAME,
+    SEARCH_AND_DELETE_BACK
+  );
+
+  do {
+    printf("> ");
+    scanf("%d", &category);
+  } while (
+    category < SEARCH_AND_DELETE_BACK ||
+      category >= SEARCH_AND_DELETE_TOTAL
+  );
+
+  return (search_and_delete_category_t)category;
+}
+
+municipality_t* search_by_id(list_t* list) {
   int id;
   void* pred_params[1];
   municipality_t* result;
@@ -243,12 +309,14 @@ void search_by_id(list_t* list) {
   putchar('\n');
   if (result) {
     print_a_municipality(result);
-  } else {
-    printf("ID %d のデータは存在しません\n", id);
+    return result;
   }
+
+  printf("ID %d のデータは存在しません\n", id);
+  return NULL;
 }
 
-void search_by_name(list_t* list) {
+municipality_t* search_by_name(list_t* list) {
   char name[64];
   void* pred_params[1];
   municipality_t* result;
@@ -265,15 +333,18 @@ void search_by_name(list_t* list) {
   putchar('\n');
   if (result) {
     print_a_municipality(result);
-  } else {
-    printf("名称「%s」のデータは存在しません\n", name);
+    return result;
   }
+
+  printf("名称「%s」のデータは存在しません\n", name);
+  return NULL;
 }
 
-void search_by_name_like(list_t* list) {
+int search_by_name_like(list_t* list) {
   list_t matched_list;
   char pattern[64];
   void* pred_params[1];
+  int matched;
 
   NULL_CHECK(list, "search_by_name_like: list");
 
@@ -285,15 +356,19 @@ void search_by_name_like(list_t* list) {
   list_init(&matched_list);
 
   list_filter(list, &matched_list, municipality_name_like, pred_params);
+  matched = !list_is_empty(&matched_list);
   print_data(&matched_list);
 
   list_free(&matched_list);
+
+  return matched;
 }
 
-void search_by_area(list_t* list) {
+int search_by_area(list_t* list) {
   list_t matched_list;
   double area_min, area_max;
   void* pred_params[2];
+  int matched;
 
   NULL_CHECK(list, "search_by_area: list");
 
@@ -323,9 +398,69 @@ void search_by_area(list_t* list) {
   list_init(&matched_list);
 
   list_filter(list, &matched_list, municipality_area_in_range, pred_params);
+  matched = !list_is_empty(&matched_list);
   print_data(&matched_list);
 
   list_free(&matched_list);
+
+  return matched;
+}
+
+int search_and_delete_by_id(list_t* list) {
+  municipality_t* matched;
+
+  NULL_CHECK(list, "search_and_delete_by_id: list");
+
+  matched = search_by_id(list);
+  if (!matched) {
+    // 見つからなかったので削除しない
+    return 0;
+  }
+
+  putchar('\n');
+  if (!confirm_delete()) {
+    // キャンセルされたので削除しない
+    return 0;
+  }
+
+  list_delete_matched(list, matched);
+
+  puts("1 件のデータを削除しました。");
+  return 1;
+}
+
+int search_and_delete_by_name(list_t* list) {
+  municipality_t* matched;
+
+  NULL_CHECK(list, "search_and_delete_by_id: list");
+
+  matched = search_by_name(list);
+  if (!matched) {
+    // 見つからなかったので削除しない
+    return 0;
+  }
+
+  putchar('\n');
+  if (!confirm_delete()) {
+    // キャンセルされたので削除しない
+    return 0;
+  }
+
+  list_delete_matched(list, matched);
+
+  puts("1 件のデータを削除しました。");
+  return 1;
+}
+
+int confirm_delete(void) {
+  int answer;
+
+  do {
+    printf("削除しますか? (Yes: 0 / No: 1) > ");
+    scanf("%d", &answer);
+  } while (answer != 0 && answer != 1);
+
+  return answer == 0;
 }
 
 void print_municipality(municipality_t* value, void** params) {

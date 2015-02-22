@@ -90,6 +90,48 @@ void list_delete_head(list_t* list) {
   list->length -= 1;
 }
 
+void list_delete_matched(list_t* list, municipality_t* data) {
+  int id;
+  list_node_t* prev_node;
+  list_node_t* current_node;
+
+  NULL_CHECK(list, "list_delete_matched: list");
+  NULL_CHECK(data, "list_delete_matched: data");
+
+  if (list_is_empty(list)) {
+    // 空だったら何もしない
+    return;
+  }
+
+  id = data->id;
+  current_node = list->head;
+
+  if (current_node->value.id == id) {
+    list_delete_head(list);
+    return;
+  }
+
+  prev_node = list->head;
+  current_node = list->head->next;
+  while (current_node) {
+    if (current_node->value.id == id) {
+      prev_node->next = current_node->next;
+
+      if (current_node == list->tail) {
+        list->tail = prev_node;
+      }
+
+      list_node_free(current_node);
+      list->length -= 1;
+
+      break;
+    }
+
+    prev_node = current_node;
+    current_node = current_node->next;
+  }
+}
+
 void list_clear(list_t* list) {
   NULL_CHECK(list, "list_clear: list");
 

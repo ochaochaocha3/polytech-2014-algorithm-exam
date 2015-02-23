@@ -10,7 +10,7 @@
 #include "municipality.h"
 
 typedef struct list_node {
-  municipality_t value;
+  municipality_t* value;
   struct list_node* next;
 } list_node_t;
 

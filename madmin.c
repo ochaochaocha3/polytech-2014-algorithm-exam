@@ -38,6 +38,7 @@ typedef enum search_and_delete_category {
 
 command_t select_command(void);
 void add_initial_data(list_t* list);
+void free_data(municipality_t* value, void** params);
 void print_municipality(municipality_t* value, void** params);
 void print_header(void);
 void print_a_municipality(municipality_t* municipality);
@@ -96,6 +97,7 @@ int main(void) {
     }
   }
 
+  list_for_each(&list, free_data, NULL);
   list_free(&list);
 
   return 0;
@@ -125,33 +127,43 @@ command_t select_command(void) {
 void add_initial_data(list_t* list) {
   // データは以下の URL から入手した
   // http://toukei.pref.shizuoka.jp/toukeikikakuhan/data/01-040/h24_02_01.html
-  municipality_t data[] = {
-    {1,  "Shizuoka",   1411.93},
-    {2,  "Hamamatsu",  1558.04},
-    {11, "Atami",        61.61},
-    {12, "Mishima",      62.13},
-    {13, "Numazu",      187.13},
-    {14, "Fujinomiya",  388.99},
-    {15, "Fuji",        245.02},
-    {16, "Fujieda",     194.03},
-    {17, "Shimada",     315.88},
-    {18, "Kakegawa",    265.63},
-    {19, "Fukuroi",     108.56},
-    {20, "Iwata",       164.08},
-    {21, "Kosai",        86.65},
-  };
-  int length = sizeof(data) / sizeof(data[0]);
-  int i;
+#define INITIAL_DATA_LENGTH 13
+  municipality_t* data[INITIAL_DATA_LENGTH];
+  int i = 0;
 
   NULL_CHECK(list, "add_initial_data: list");
 
-  for (i = 0; i < length; ++i) {
-    list_append(list, &data[i]);
+  for (i = 0; i < INITIAL_DATA_LENGTH; ++i) {
+    data[i] = malloc(sizeof(municipality_t));
   }
+
+  i = 0;
+  municipality_init(data[i++], 1,  "Shizuoka",   1411.93);
+  municipality_init(data[i++], 2,  "Hamamatsu",  1558.04);
+  municipality_init(data[i++], 11, "Atami",        61.61);
+  municipality_init(data[i++], 12, "Mishima",      62.13);
+  municipality_init(data[i++], 13, "Numazu",      187.13);
+  municipality_init(data[i++], 14, "Fujinomiya",  388.99);
+  municipality_init(data[i++], 15, "Fuji",        245.02);
+  municipality_init(data[i++], 16, "Fujieda",     194.03);
+  municipality_init(data[i++], 17, "Shimada",     315.88);
+  municipality_init(data[i++], 18, "Kakegawa",    265.63);
+  municipality_init(data[i++], 19, "Fukuroi",     108.56);
+  municipality_init(data[i++], 20, "Iwata",       164.08);
+  municipality_init(data[i++], 21, "Kosai",        86.65);
+
+  for (i = 0; i < INITIAL_DATA_LENGTH; ++i) {
+    list_append(list, data[i]);
+  }
+}
+
+void free_data(municipality_t* value, void** params) {
+  municipality_free(value);
 }
 
 void append_data(list_t* list) {
   municipality_t data;
+  municipality_t* new_municipality;
   void* pred_params[1];
 
   NULL_CHECK(list, "add_data: list");
@@ -175,7 +187,11 @@ void append_data(list_t* list) {
   printf("面積 [km^2]: ");
   scanf("%lf", &data.area);
 
-  list_append(list, &data);
+  new_municipality = malloc(sizeof(municipality_t));
+  NULL_CHECK(new_municipality, "append_data: new_municipality");
+  municipality_init(new_municipality, data.id, data.name, data.area);
+
+  list_append(list, new_municipality);
 
   puts("1 件のデータを末尾に挿入しました");
 }
@@ -188,7 +204,10 @@ void delete_data(list_t* list) {
   if (list_is_empty(list)) {
     puts("データが存在しません");
   } else {
+    municipality_t* value = list->head->value;
     list_delete_head(list);
+    municipality_free(value);
+
     puts("先頭の 1 件のデータを削除しました");
   }
 }
@@ -424,6 +443,7 @@ int search_and_delete_by_id(list_t* list) {
   }
 
   list_delete_matched(list, matched);
+  municipality_free(matched);
 
   puts("1 件のデータを削除しました。");
   return 1;
@@ -447,6 +467,7 @@ int search_and_delete_by_name(list_t* list) {
   }
 
   list_delete_matched(list, matched);
+  municipality_free(matched);
 
   puts("1 件のデータを削除しました。");
   return 1;

@@ -55,7 +55,7 @@ void list_append(list_t* list, municipality_t* data) {
   NULL_CHECK(data, "list_append: data");
 
   new_node = list_node_new();
-  municipality_copy(data, &new_node->value);
+  new_node->value = data;
 
   if (list_is_empty(list)) {
     list->head = list->tail = new_node;
@@ -106,7 +106,7 @@ void list_delete_matched(list_t* list, municipality_t* data) {
   id = data->id;
   current_node = list->head;
 
-  if (current_node->value.id == id) {
+  if (current_node->value->id == id) {
     list_delete_head(list);
     return;
   }
@@ -114,7 +114,7 @@ void list_delete_matched(list_t* list, municipality_t* data) {
   prev_node = list->head;
   current_node = list->head->next;
   while (current_node) {
-    if (current_node->value.id == id) {
+    if (current_node->value->id == id) {
       prev_node->next = current_node->next;
 
       if (current_node == list->tail) {
@@ -149,7 +149,7 @@ void list_for_each(
 
   node = list->head;
   while (node) {
-    callback(&node->value, params);
+    callback(node->value, params);
     node = node->next;
   }
 }
@@ -164,7 +164,7 @@ municipality_t* list_search(
 
   node = list->head;
   while (node) {
-    value = &node->value;
+    value = node->value;
     if (pred(value, params)) {
       return value;
     }
@@ -185,8 +185,8 @@ void list_filter(
 
   node = src->head;
   while (node) {
-    if (pred(&node->value, params)) {
-      list_append(dest, &node->value);
+    if (pred(node->value, params)) {
+      list_append(dest, node->value);
     }
 
     node = node->next;

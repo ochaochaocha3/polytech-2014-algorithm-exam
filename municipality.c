@@ -11,12 +11,18 @@
 #include "debug.h"
 #include "municipality.h"
 
-void municipality_init(municipality_t* municipality) {
+void municipality_init(
+  municipality_t* municipality, int id, const char* name, double area
+) {
   NULL_CHECK(municipality, "municipality_init: municipality");
 
-  municipality->id = 0;
-  memset(municipality->name, '\0', MUNICIPALITY_NAME_SIZE);
-  municipality->area = 0.0;
+  municipality->id = id;
+  strncpy(municipality->name, name, MUNICIPALITY_NAME_SIZE);
+  municipality->area = area;
+}
+
+void municipality_free(municipality_t* municipality) {
+  free(municipality);
 }
 
 void municipality_copy(municipality_t* src, municipality_t* dest) {

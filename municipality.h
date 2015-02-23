@@ -17,7 +17,10 @@ typedef struct municipality {
 } municipality_t;
 
 // 自治体情報の構造体を初期化する
-void municipality_init(municipality_t* municipality);
+void municipality_init(
+  municipality_t* municipality, int id, const char* name, double area
+);
+void municipality_free(municipality_t* municipality);
 // 自治体情報の構造体を複製する
 void municipality_copy(municipality_t* src, municipality_t* dest);
 

@@ -19,19 +19,11 @@ void municipality_init(
   municipality->id = id;
   strncpy(municipality->name, name, MUNICIPALITY_NAME_SIZE);
   municipality->area = area;
+  memset(municipality->adjacency_list, 0, MUNICIPALITY_ADJ_SIZE);
 }
 
 void municipality_free(municipality_t* municipality) {
   free(municipality);
-}
-
-void municipality_copy(municipality_t* src, municipality_t* dest) {
-  NULL_CHECK(src, "municipality_copy: src");
-  NULL_CHECK(dest, "municipality_copy: dest");
-
-  dest->id = src->id;
-  strncpy(dest->name, src->name, MUNICIPALITY_NAME_SIZE);
-  dest->area = src->area;
 }
 
 int municipality_id_equal(municipality_t* municipality, void** params) {

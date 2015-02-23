@@ -124,10 +124,10 @@ command_t select_command(void) {
   return (command_t)command;
 }
 
+#define INITIAL_DATA_LENGTH 22
 void add_initial_data(list_t* list) {
   // データは以下の URL から入手した
   // http://toukei.pref.shizuoka.jp/toukeikikakuhan/data/01-040/h24_02_01.html
-#define INITIAL_DATA_LENGTH 13
   municipality_t* data[INITIAL_DATA_LENGTH];
   int i = 0;
 
@@ -138,19 +138,129 @@ void add_initial_data(list_t* list) {
   }
 
   i = 0;
-  municipality_init(data[i++], 1,  "Shizuoka",   1411.93);
-  municipality_init(data[i++], 2,  "Hamamatsu",  1558.04);
-  municipality_init(data[i++], 11, "Atami",        61.61);
-  municipality_init(data[i++], 12, "Mishima",      62.13);
-  municipality_init(data[i++], 13, "Numazu",      187.13);
-  municipality_init(data[i++], 14, "Fujinomiya",  388.99);
-  municipality_init(data[i++], 15, "Fuji",        245.02);
-  municipality_init(data[i++], 16, "Fujieda",     194.03);
-  municipality_init(data[i++], 17, "Shimada",     315.88);
-  municipality_init(data[i++], 18, "Kakegawa",    265.63);
-  municipality_init(data[i++], 19, "Fukuroi",     108.56);
-  municipality_init(data[i++], 20, "Iwata",       164.08);
-  municipality_init(data[i++], 21, "Kosai",        86.65);
+  municipality_init(data[i], 1,  "Shizuoka",   1411.93);
+  data[i]->adjacency_list[0] = 19;
+  data[i]->adjacency_list[1] = 20;
+  data[i]->adjacency_list[2] = 21;
+  data[i]->adjacency_list[3] = 22;
+
+  ++i;
+  municipality_init(data[i], 2,  "Hamamatsu",  1558.04);
+  data[i]->adjacency_list[0] = 11;
+  data[i]->adjacency_list[1] = 12;
+
+  ++i;
+  municipality_init(data[i], 11, "Kosai",        86.65);
+  data[i]->adjacency_list[0] = 2;
+
+  ++i;
+  municipality_init(data[i], 12, "Iwata",       164.08);
+  data[i]->adjacency_list[0] = 2;
+  data[i]->adjacency_list[1] = 13;
+
+  ++i;
+  municipality_init(data[i], 13, "Fukuroi",     108.56);
+  data[i]->adjacency_list[0] = 12;
+  data[i]->adjacency_list[1] = 14;
+
+  ++i;
+  municipality_init(data[i], 14, "Kakegawa",    265.63);
+  data[i]->adjacency_list[0] = 13;
+  data[i]->adjacency_list[1] = 15;
+  data[i]->adjacency_list[2] = 16;
+  data[i]->adjacency_list[3] = 17;
+
+  ++i;
+  municipality_init(data[i], 15, "Omaezaki",     65.86);
+  data[i]->adjacency_list[0] = 14;
+  data[i]->adjacency_list[1] = 16;
+  data[i]->adjacency_list[2] = 18;
+
+  ++i;
+  municipality_init(data[i], 16, "Kikugawa",     94.24);
+  data[i]->adjacency_list[0] = 14;
+  data[i]->adjacency_list[1] = 15;
+  data[i]->adjacency_list[2] = 17;
+  data[i]->adjacency_list[3] = 18;
+
+  ++i;
+  municipality_init(data[i], 17, "Shimada",     315.88);
+  data[i]->adjacency_list[0] = 14;
+  data[i]->adjacency_list[1] = 16;
+  data[i]->adjacency_list[2] = 18;
+  data[i]->adjacency_list[3] = 19;
+
+  ++i;
+  municipality_init(data[i], 18, "Makinohara",  111.68);
+  data[i]->adjacency_list[0] = 15;
+  data[i]->adjacency_list[1] = 16;
+  data[i]->adjacency_list[2] = 17;
+
+  ++i;
+  municipality_init(data[i], 19, "Fujieda",     194.03);
+  data[i]->adjacency_list[0] = 1;
+  data[i]->adjacency_list[1] = 17;
+  data[i]->adjacency_list[2] = 20;
+
+  ++i;
+  municipality_init(data[i], 20, "Yaizu",        70.62);
+  data[i]->adjacency_list[0] = 1;
+  data[i]->adjacency_list[1] = 17;
+
+  ++i;
+  municipality_init(data[i], 21, "Fuji",        245.02);
+  data[i]->adjacency_list[0] = 1;
+  data[i]->adjacency_list[1] = 22;
+  data[i]->adjacency_list[2] = 23;
+  data[i]->adjacency_list[3] = 25;
+
+  ++i;
+  municipality_init(data[i], 22, "Fujinomiya",  388.99);
+  data[i]->adjacency_list[0] = 1;
+  data[i]->adjacency_list[1] = 21;
+
+  ++i;
+  municipality_init(data[i], 23, "Numazu",      187.13);
+  data[i]->adjacency_list[0] = 21;
+  data[i]->adjacency_list[1] = 24;
+  data[i]->adjacency_list[2] = 27;
+
+  ++i;
+  municipality_init(data[i], 24, "Mishima",      62.13);
+  data[i]->adjacency_list[0] = 23;
+  data[i]->adjacency_list[1] = 25;
+
+  ++i;
+  municipality_init(data[i], 25, "Susono",      138.17);
+  data[i]->adjacency_list[0] = 21;
+  data[i]->adjacency_list[1] = 24;
+  data[i]->adjacency_list[2] = 26;
+
+  ++i;
+  municipality_init(data[i], 26, "Gotemba",     194.85);
+  data[i]->adjacency_list[0] = 25;
+
+  ++i;
+  municipality_init(data[i], 27, "Izunokuni",    94.71);
+  data[i]->adjacency_list[0] = 23;
+  data[i]->adjacency_list[1] = 28;
+  data[i]->adjacency_list[2] = 29;
+
+  ++i;
+  municipality_init(data[i], 28, "Atami",        61.61);
+  data[i]->adjacency_list[0] = 27;
+  data[i]->adjacency_list[1] = 30;
+
+  ++i;
+  municipality_init(data[i], 29, "Izu",         363.97);
+  data[i]->adjacency_list[0] = 23;
+  data[i]->adjacency_list[1] = 27;
+  data[i]->adjacency_list[2] = 30;
+
+  ++i;
+  municipality_init(data[i], 30, "Ito",         124.13);
+  data[i]->adjacency_list[0] = 28;
+  data[i]->adjacency_list[1] = 29;
 
   for (i = 0; i < INITIAL_DATA_LENGTH; ++i) {
     list_append(list, data[i]);
@@ -165,6 +275,7 @@ void append_data(list_t* list) {
   municipality_t data;
   municipality_t* new_municipality;
   void* pred_params[1];
+  int i;
 
   NULL_CHECK(list, "add_data: list");
 
@@ -190,6 +301,15 @@ void append_data(list_t* list) {
   new_municipality = malloc(sizeof(municipality_t));
   NULL_CHECK(new_municipality, "append_data: new_municipality");
   municipality_init(new_municipality, data.id, data.name, data.area);
+
+  for (i = 0; i < MUNICIPALITY_ADJ_SIZE; ++i) {
+    printf("隣接 ID %d (0 以下でなしに設定): ", i);
+    scanf("%d", &new_municipality->adjacency_list[i]);
+
+    if (new_municipality->adjacency_list[i] < 1) {
+      break;
+    }
+  }
 
   list_append(list, new_municipality);
 
@@ -485,18 +605,34 @@ int confirm_delete(void) {
 }
 
 void print_municipality(municipality_t* value, void** params) {
+  int i;
+
   NULL_CHECK(value, "print_municipality: value");
 
   printf(
-    "%2d  %-16s    %11.2f\n",
+    "%4d    %-16s    %11.2f     ",
     value->id, value->name, value->area
   );
+
+  for (
+    i = 0;
+    i < MUNICIPALITY_ADJ_SIZE && value->adjacency_list[i] > 0;
+    ++i
+  ) {
+    if (i > 0) {
+      printf(", ");
+    }
+
+    printf("%2d", value->adjacency_list[i]);
+  }
+
+  putchar('\n');
 }
 
 void print_header(void) {
   puts(
-    "ID  名称                面積 [km^2]\n"
-    "-----------------------------------"
+    "  ID    名称                面積 [km^2]     隣接\n"
+    "----------------------------------------------------------"
   );
 }
 

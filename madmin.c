@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "municipality.h"
 #include "list.h"
+#include "route_search.h"
 
 typedef enum command {
   COMMAND_EXIT,              // 終了
@@ -16,6 +17,7 @@ typedef enum command {
   COMMAND_DELETE,            // 削除
   COMMAND_SEARCH,            // 探索
   COMMAND_SEARCH_AND_DELETE, // 探索 & 削除
+  COMMAND_ROUTE_SEARCH,      // 経路探索
   COMMAND_LIST,              // 一覧
   COMMAND_TOTAL              // ダミー：総数を知るために使う
 } command_t;
@@ -49,6 +51,7 @@ void search_data(list_t* list);
 search_category_t select_search_category(void);
 void search_and_delete_data(list_t* list);
 search_and_delete_category_t select_search_and_delete_category(void);
+void route_search(list_t* list);
 
 municipality_t* search_by_id(list_t* list);
 municipality_t* search_by_name(list_t* list);
@@ -92,6 +95,9 @@ int main(void) {
     case COMMAND_SEARCH_AND_DELETE:
       search_and_delete_data(&list);
       break;
+    case COMMAND_ROUTE_SEARCH:
+      route_search(&list);
+      break;
     default:
       break;
     }
@@ -107,11 +113,13 @@ command_t select_command(void) {
   int command;
 
   printf(
-    "[%d]挿入 [%d]削除 [%d]探索 [%d]探索 & 削除 [%d]一覧 [%d]終了\n",
+    "[%d]挿入 [%d]削除 [%d]探索 [%d]探索 & 削除 "
+      "[%d]経路探索 [%d]一覧 [%d]終了\n",
     COMMAND_APPEND,
     COMMAND_DELETE,
     COMMAND_SEARCH,
     COMMAND_SEARCH_AND_DELETE,
+    COMMAND_ROUTE_SEARCH,
     COMMAND_LIST,
     COMMAND_EXIT
   );
@@ -124,7 +132,7 @@ command_t select_command(void) {
   return (command_t)command;
 }
 
-#define INITIAL_DATA_LENGTH 22
+#define INITIAL_DATA_LENGTH 23
 void add_initial_data(list_t* list) {
   // データは以下の URL から入手した
   // http://toukei.pref.shizuoka.jp/toukeikikakuhan/data/01-040/h24_02_01.html
@@ -261,6 +269,9 @@ void add_initial_data(list_t* list) {
   municipality_init(data[i], 30, "Ito",         124.13);
   data[i]->adjacency_list[0] = 28;
   data[i]->adjacency_list[1] = 29;
+
+  ++i;
+  municipality_init(data[i], 31, "Shimoda",     104.71);
 
   for (i = 0; i < INITIAL_DATA_LENGTH; ++i) {
     list_append(list, data[i]);
@@ -429,6 +440,46 @@ search_and_delete_category_t select_search_and_delete_category(void) {
   );
 
   return (search_and_delete_category_t)category;
+}
+
+void route_search(list_t* list) {
+  int from_id, to_id;
+  municipality_t* from;
+  municipality_t* to;
+  void* pred_params[1];
+
+  NULL_CHECK(list, "route_search: list");
+
+  printf("\n始点 ID: ");
+  scanf("%d", &from_id);
+
+  pred_params[0] = (void*)&from_id;
+  from = list_search(list, municipality_id_equal, pred_params);
+  if (from) {
+    printf("始点: %d %s\n", from_id, from->name);
+  } else {
+    printf("ID %d のデータは存在しません\n", from_id);
+    return;
+  }
+
+  printf("終点 ID: ");
+  scanf("%d", &to_id);
+
+  pred_params[0] = (void*)&to_id;
+  to = list_search(list, municipality_id_equal, pred_params);
+  if (to) {
+    if (to == from) {
+      puts("始点と終点が同じです");
+      return;
+    }
+
+    printf("終点: %d %s\n", to_id, to->name);
+  } else {
+    printf("ID %d のデータは存在しません\n", to_id);
+    return;
+  }
+
+  do_route_search(list, from, to);
 }
 
 municipality_t* search_by_id(list_t* list) {

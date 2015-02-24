@@ -1,4 +1,5 @@
 *.o
 madmin
+visit_table_test
 *.exe
 *.xls

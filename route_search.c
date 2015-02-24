@@ -38,7 +38,7 @@ void do_route_search(
   route_search_node_t* queue;
   route_search_node_t* end_node;
   size_t n_municipalities;
-  size_t queue_size = 2;
+  size_t queue_size = 1;
   int start_id, end_id;
   void* pred_params[1];
   size_t i;
@@ -65,6 +65,10 @@ void do_route_search(
   n_municipalities = list_length(list);
   for (i = 0; i < n_municipalities; ++i) {
     queue_size *= 2;
+  }
+  if (queue_size < 64) {
+    // 最低でも以下の領域を確保する
+    queue_size = 64;
   }
 
   queue = malloc(queue_size * sizeof(route_search_node_t));

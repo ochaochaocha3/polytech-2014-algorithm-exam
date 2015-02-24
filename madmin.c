@@ -38,28 +38,50 @@ typedef enum search_and_delete_category {
   SEARCH_AND_DELETE_TOTAL    // ダミー：総数を知るために使う
 } search_and_delete_category_t;
 
+// コマンド選択画面を表示し、選んだコマンドを返す
 command_t select_command(void);
+// 初期データを追加する
 void add_initial_data(list_t* list);
+// データを解放するコールバック関数
 void free_data(municipality_t* value, void** params);
+// 自治体情報を出力するコールバック関数
 void print_municipality(municipality_t* value, void** params);
+// 自治体情報の見出しを出力する
 void print_header(void);
+// 1 件の自治体情報を出力する
 void print_a_municipality(municipality_t* municipality);
+// 一覧表示する
 void print_data(list_t* list);
+// データをリストの末尾に追加する
 void append_data(list_t* list);
+// リストの先頭のデータを削除する
 void delete_data(list_t* list);
+// データを探索する
 void search_data(list_t* list);
+// 探索カテゴリの選択画面を表示し、選んだカテゴリを返す
 search_category_t select_search_category(void);
+// 探索 & 削除を行う
 void search_and_delete_data(list_t* list);
+// 探索 & 探索カテゴリの選択画面を表示し、選んだカテゴリを返す
 search_and_delete_category_t select_search_and_delete_category(void);
+// 経路探索を行う
 void route_search(list_t* list);
 
+// ID で探索する
 municipality_t* search_by_id(list_t* list);
+// 名称で探索する
 municipality_t* search_by_name(list_t* list);
+// 曖昧な名称で探索する
+// SQL の LIKE に相当する
 int search_by_name_like(list_t* list);
+// 面積で探索する
 int search_by_area(list_t* list);
 
+// ID で探索 & 削除を行う
 int search_and_delete_by_id(list_t* list);
+// 名称で探索 & 削除を行う
 int search_and_delete_by_name(list_t* list);
+// 削除するかどうか確認する
 int confirm_delete(void);
 
 int main(void) {

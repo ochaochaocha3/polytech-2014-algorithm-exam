@@ -11,19 +11,24 @@
 #include "visit_table.h"
 #include "route_search.h"
 
+// 幅優先探索のノード
 typedef struct route_search_node {
   int id;
   struct route_search_node* from;
 } route_search_node_t;
 
+// 幅優先探索のノードを初期化する
 static void route_search_node_init(route_search_node_t* node);
+// 最短経路を幅優先探索で見つける
 static route_search_node_t* route_search_bfs(
   municipality_t* start, municipality_t* end,
   visit_table_t* visit_table, route_search_node_t* queue, size_t queue_size
 );
-static void print_path(
+// 見つかった最短経路を出力する
+static void route_search_print_path(
   route_search_node_t* node, visit_table_t* visit_table
 );
+// 訪問テーブルに自治体情報を追加するコールバック関数
 static void add_to_visit_table(municipality_t* municipality, void** params);
 
 void do_route_search(
@@ -50,11 +55,6 @@ void do_route_search(
     start_id, start->name, end_id, end->name
   );
 
-  n_municipalities = list_length(list);
-  for (i = 0; i < n_municipalities; ++i) {
-    queue_size *= MUNICIPALITY_ADJ_SIZE / 2;
-  }
-
   // 訪問テーブルの準備
   visit_table_init(&visit_table);
 
@@ -62,6 +62,11 @@ void do_route_search(
   list_for_each(list, add_to_visit_table, pred_params);
 
   // キューの準備
+  n_municipalities = list_length(list);
+  for (i = 0; i < n_municipalities; ++i) {
+    queue_size *= 2;
+  }
+
   queue = malloc(queue_size * sizeof(route_search_node_t));
   NULL_CHECK(queue, "do_route_search: queue");
   for (i = 0; i < queue_size; ++i) {
@@ -73,7 +78,7 @@ void do_route_search(
   );
 
   if (end_node) {
-    print_path(end_node, &visit_table);
+    route_search_print_path(end_node, &visit_table);
     putchar('\n');
   } else {
     puts("到達できませんでした");
@@ -139,17 +144,17 @@ static route_search_node_t* route_search_bfs(
   return NULL;
 }
 
-static void print_path(
+static void route_search_print_path(
   route_search_node_t* node, visit_table_t* visit_table
 ) {
   municipality_t* municipality;
 
-  NULL_CHECK(node, "print_path: node");
-  NULL_CHECK(node, "print_path: visit_table");
+  NULL_CHECK(node, "route_search_print_path: node");
+  NULL_CHECK(node, "route_search_print_path: visit_table");
 
   municipality = visit_table_municipality(visit_table, node->id);
   if (node->from) {
-    print_path(node->from, visit_table);
+    route_search_print_path(node->from, visit_table);
     printf(" -> %s", municipality->name);
   } else {
     printf("%s", municipality->name);

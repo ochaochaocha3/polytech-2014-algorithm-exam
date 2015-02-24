@@ -9,6 +9,7 @@
 
 #include "list.h"
 
+// 経路探索を行う
 void do_route_search(
   list_t* list, municipality_t* start, municipality_t* end
 );

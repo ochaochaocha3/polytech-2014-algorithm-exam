@@ -1,6 +1,8 @@
 /*
  * 2014 年度 データ構造・アルゴリズム 課題
  * 自治体情報管理プログラム::経路探索::訪問テーブル
+ *
+ * チェイン法のハッシュテーブルで実装している
  */
 
 #include <stdio.h>
@@ -8,10 +10,15 @@
 #include "debug.h"
 #include "visit_table.h"
 
+// 指定した ID に対応する値を返す
+// 名前は Ruby の Hash#fetch から
+// http://docs.ruby-lang.org/ja/2.2.0/class/Hash.html#I_FETCH
 static visit_table_value_t* visit_table_fetch(visit_table_t* table, int id);
+// 値を初期化する
 static void visit_table_value_init(
   visit_table_value_t* value, municipality_t* municipality
 );
+// 値の領域を解放する
 static void visit_table_value_free(visit_table_value_t* value);
 
 void visit_table_init(visit_table_t* table) {
@@ -58,7 +65,7 @@ void visit_table_add(visit_table_t* table, municipality_t* municipality) {
 
   hash = municipality->id % VISIT_TABLE_SIZE;
   if (table->bucket[hash]) {
-    // 既に同じハッシュ値のデータが存在する
+    // 既に同じハッシュ値の値が存在する
     tail_value = table->bucket[hash];
     while (tail_value->next) {
       tail_value = tail_value->next;
@@ -66,6 +73,7 @@ void visit_table_add(visit_table_t* table, municipality_t* municipality) {
 
     tail_value->next = new_value;
   } else {
+    // そのハッシュ値の値は存在しない
     table->bucket[hash] = new_value;
   }
 }

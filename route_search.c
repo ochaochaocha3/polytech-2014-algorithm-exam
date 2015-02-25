@@ -112,7 +112,6 @@ static route_search_node_t* route_search_bfs(
   while (head_idx < tail_idx) {
     // デキュー
     head = &queue[head_idx++];
-    printf("[DEBUG] %d; tail_idx: %lu\n", head->id, (unsigned long)tail_idx);
 
     if (head->id == end->id) {
       // 終点が見つかった
@@ -121,7 +120,6 @@ static route_search_node_t* route_search_bfs(
 
     municipality = visit_table_municipality(visit_table, head->id);
 
-    printf("enqued: ");
     // 隣接自治体をエンキューする
     for (i = 0; i < MUNICIPALITY_ADJ_SIZE; ++i) {
       adjacent_id = municipality->adjacency_list[i];
@@ -137,14 +135,11 @@ static route_search_node_t* route_search_bfs(
 
         queue[tail_idx].id = adjacent_id;
         queue[tail_idx].from = head;
-
-        printf("%d ", adjacent_id);
         visit_table_set_visited(visit_table, adjacent_id);
 
         ++tail_idx;
       }
     }
-    putchar('\n');
   }
 
   // 終点へ到達できなかった場合

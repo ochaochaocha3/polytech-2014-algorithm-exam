@@ -37,8 +37,7 @@ void do_route_search(
   visit_table_t visit_table;
   route_search_node_t* queue;
   route_search_node_t* end_node;
-  size_t n_municipalities;
-  size_t queue_size = 1;
+  size_t queue_size;
   int start_id, end_id;
   void* pred_params[1];
   size_t i;
@@ -62,17 +61,10 @@ void do_route_search(
   list_for_each(list, add_to_visit_table, pred_params);
 
   // キューの準備
-  n_municipalities = list_length(list);
-  for (i = 0; i < n_municipalities; ++i) {
-    queue_size *= 2;
-  }
-  if (queue_size < 64) {
-    // 最低でも以下の領域を確保する
-    queue_size = 64;
-  }
-
+  queue_size = (1 + MUNICIPALITY_ADJ_SIZE) * list_length(list);
   queue = malloc(queue_size * sizeof(route_search_node_t));
   NULL_CHECK(queue, "do_route_search: queue");
+
   for (i = 0; i < queue_size; ++i) {
     route_search_node_init(&queue[i]);
   }
@@ -114,16 +106,23 @@ static route_search_node_t* route_search_bfs(
 
   head_idx = 0;
   queue[0].id = start->id;
+  visit_table_set_visited(visit_table, start->id);
   tail_idx = 1;
 
   while (head_idx < tail_idx) {
+    // デキュー
     head = &queue[head_idx++];
+    printf("[DEBUG] %d; tail_idx: %lu\n", head->id, (unsigned long)tail_idx);
 
     if (head->id == end->id) {
+      // 終点が見つかった
       return head;
     }
 
     municipality = visit_table_municipality(visit_table, head->id);
+
+    printf("enqued: ");
+    // 隣接自治体をエンキューする
     for (i = 0; i < MUNICIPALITY_ADJ_SIZE; ++i) {
       adjacent_id = municipality->adjacency_list[i];
       if (adjacent_id < 1) {
@@ -139,9 +138,13 @@ static route_search_node_t* route_search_bfs(
         queue[tail_idx].id = adjacent_id;
         queue[tail_idx].from = head;
 
+        printf("%d ", adjacent_id);
+        visit_table_set_visited(visit_table, adjacent_id);
+
         ++tail_idx;
       }
     }
+    putchar('\n');
   }
 
   // 終点へ到達できなかった場合

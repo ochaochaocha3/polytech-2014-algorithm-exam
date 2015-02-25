@@ -8,6 +8,7 @@
 #define _DEBUG_H
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define DEBUG /* デバッグ中 */
 

@@ -6,7 +6,7 @@ TARGET=madmin
 
 all: $(TARGET)
 
-$(TARGET): municipality.o list.o route_search.o visit_table.o madmin.c
+$(TARGET): municipality.o list.o route_search.o visit_table.o graph.o madmin.c
 	$(CC) $(CFLAGS) -o $(TARGET) $^
 
 visit_table_test: visit_table.o visit_table_test.c
@@ -18,10 +18,13 @@ municipality.o: municipality.c municipality.h debug.h
 list.o: list.c list.h debug.h
 	$(CC) $(CFLAGS) -c $<
 
-route_search.o: route_search.c route_search.h debug.h
+route_search.o: route_search.c route_search.h debug.h visit_table.o
 	$(CC) $(CFLAGS) -c $<
 
 visit_table.o: visit_table.c visit_table.h debug.h
+	$(CC) $(CFLAGS) -c $<
+
+graph.o: graph.c graph.h debug.h
 	$(CC) $(CFLAGS) -c $<
 
 .PHONY: clean

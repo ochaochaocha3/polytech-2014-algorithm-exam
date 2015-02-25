@@ -10,7 +10,9 @@
 #include "municipality.h"
 #include "list.h"
 #include "route_search.h"
+#include "graph.h"
 
+// コマンド
 typedef enum command {
   COMMAND_EXIT,              // 終了
   COMMAND_APPEND,            // 挿入
@@ -18,10 +20,12 @@ typedef enum command {
   COMMAND_SEARCH,            // 探索
   COMMAND_SEARCH_AND_DELETE, // 探索 & 削除
   COMMAND_ROUTE_SEARCH,      // 経路探索
+  COMMAND_PRINT_GRAPH,       // グラフ表示
   COMMAND_LIST,              // 一覧
   COMMAND_TOTAL              // ダミー：総数を知るために使う
 } command_t;
 
+// 探索カテゴリ
 typedef enum search_category {
   SEARCH_BACK,          // 戻る
   SEARCH_BY_ID,         // ID で探索
@@ -32,12 +36,21 @@ typedef enum search_category {
   SEARCH_TOTAL          // ダミー：総数を知るために使う
 } search_category_t;
 
+// 探索 & 削除カテゴリ
 typedef enum search_and_delete_category {
   SEARCH_AND_DELETE_BACK,    // 戻る
   SEARCH_AND_DELETE_BY_ID,   // ID で探索
   SEARCH_AND_DELETE_BY_NAME, // 名称で探索
   SEARCH_AND_DELETE_TOTAL    // ダミー：総数を知るために使う
 } search_and_delete_category_t;
+
+// グラフ表示カテゴリ
+typedef enum graph_category {
+  GRAPH_BACK,       // 戻る
+  GRAPH_POPULATION, // 人口
+  GRAPH_AREA,       // 面積
+  GRAPH_TOTAL       // ダミー：総数を知るために使う
+} graph_category_t;
 
 // コマンド選択画面を表示し、選んだコマンドを返す
 command_t select_command(void);
@@ -67,6 +80,10 @@ void search_and_delete_data(list_t* list);
 search_and_delete_category_t select_search_and_delete_category(void);
 // 経路探索を行う
 void route_search(list_t* list);
+// グラフを表示する
+void print_graph(list_t* list);
+// グラフカテゴリの選択画面を表示し、選んだカテゴリを返す
+graph_category_t select_graph_category(void);
 
 // ID で探索する
 municipality_t* search_by_id(list_t* list);
@@ -123,6 +140,9 @@ int main(void) {
     case COMMAND_ROUTE_SEARCH:
       route_search(&list);
       break;
+    case COMMAND_PRINT_GRAPH:
+      print_graph(&list);
+      break;
     default:
       break;
     }
@@ -138,13 +158,14 @@ command_t select_command(void) {
   int command;
 
   printf(
-    "[%d]挿入 [%d]削除 [%d]探索 [%d]探索 & 削除 "
-      "[%d]経路探索 [%d]一覧 [%d]終了\n",
+    "[%d]挿入 [%d]削除 [%d]探索 [%d]探索 & 削除\n"
+    "[%d]経路探索 [%d]グラフ表示 [%d]一覧 [%d]終了\n",
     COMMAND_APPEND,
     COMMAND_DELETE,
     COMMAND_SEARCH,
     COMMAND_SEARCH_AND_DELETE,
     COMMAND_ROUTE_SEARCH,
+    COMMAND_PRINT_GRAPH,
     COMMAND_LIST,
     COMMAND_EXIT
   );
@@ -179,7 +200,7 @@ void add_initial_data(list_t* list) {
   data[i]->adjacency_list[3] = 22;
 
   ++i;
-  municipality_init(data[i], 2, "Hamamatsu", 705754, 1558.04);
+  municipality_init(data[i], 2, "Hamamatsu", 790475, 1558.04);
   data[i]->adjacency_list[0] = 11;
   data[i]->adjacency_list[1] = 12;
 
@@ -308,13 +329,65 @@ void free_data(municipality_t* value, void** params) {
   municipality_free(value);
 }
 
+void print_municipality(municipality_t* value, void** params) {
+  int i;
+
+  NULL_CHECK(value, "print_municipality: value");
+
+  printf(
+    "%4d    %-16.16s    %8ld    %12.2f     ",
+    value->id, value->name, value->population, value->area
+  );
+
+  for (
+    i = 0;
+    i < MUNICIPALITY_ADJ_SIZE && value->adjacency_list[i] > 0;
+    ++i
+  ) {
+    if (i > 0) {
+      printf(", ");
+    }
+
+    printf("%2d", value->adjacency_list[i]);
+  }
+
+  putchar('\n');
+}
+
+void print_header(void) {
+  puts(
+    "  ID    名称                    人口     面積 [km^2]     隣接\n"
+    "-----------------------------------------------------------------------"
+  );
+}
+
+void print_a_municipality(municipality_t* municipality) {
+  NULL_CHECK(municipality, "print_a_municipality: municipality");
+
+  print_header();
+  print_municipality(municipality, NULL);
+}
+
+void print_data(list_t* list) {
+  NULL_CHECK(list, "print_data: list");
+
+  putchar('\n');
+
+  if (list_is_empty(list)) {
+    puts("データが存在しません");
+  } else {
+    print_header();
+    list_for_each(list, print_municipality, NULL);
+  }
+}
+
 void append_data(list_t* list) {
   municipality_t data;
   municipality_t* new_municipality;
   void* pred_params[1];
   int i;
 
-  NULL_CHECK(list, "add_data: list");
+  NULL_CHECK(list, "append_data: list");
 
   puts("\n挿入するデータを入力してください");
 
@@ -515,6 +588,51 @@ void route_search(list_t* list) {
   }
 
   do_route_search(list, from, to);
+}
+
+void print_graph(list_t* list) {
+  int category;
+
+  NULL_CHECK(list, "print_graph: list");
+
+  if (list_is_empty(list)) {
+    puts("データが存在しません");
+    return;
+  }
+
+  category = select_graph_category();
+
+  if (category == GRAPH_BACK) {
+    return;
+  }
+
+  putchar('\n');
+  switch (category) {
+  case GRAPH_POPULATION:
+    print_population_graph(list);
+    break;
+  case GRAPH_AREA:
+    print_area_graph(list);
+    break;
+  default:
+    break;
+  }
+}
+
+graph_category_t select_graph_category(void) {
+  int category;
+
+  printf(
+    "\n[%d]人口 [%d]面積 [%d]戻る\n",
+    GRAPH_POPULATION, GRAPH_AREA, GRAPH_BACK
+  );
+
+  do {
+    printf("> ");
+    scanf("%d", &category);
+  } while (category < GRAPH_BACK || category >= GRAPH_TOTAL);
+
+  return (graph_category_t)category;
 }
 
 municipality_t* search_by_id(list_t* list) {
@@ -732,56 +850,4 @@ int confirm_delete(void) {
   } while (answer != 0 && answer != 1);
 
   return answer == 0;
-}
-
-void print_municipality(municipality_t* value, void** params) {
-  int i;
-
-  NULL_CHECK(value, "print_municipality: value");
-
-  printf(
-    "%4d    %-16.16s    %8ld    %12.2f     ",
-    value->id, value->name, value->population, value->area
-  );
-
-  for (
-    i = 0;
-    i < MUNICIPALITY_ADJ_SIZE && value->adjacency_list[i] > 0;
-    ++i
-  ) {
-    if (i > 0) {
-      printf(", ");
-    }
-
-    printf("%2d", value->adjacency_list[i]);
-  }
-
-  putchar('\n');
-}
-
-void print_header(void) {
-  puts(
-    "  ID    名称                    人口     面積 [km^2]     隣接\n"
-    "-----------------------------------------------------------------------"
-  );
-}
-
-void print_a_municipality(municipality_t* municipality) {
-  NULL_CHECK(municipality, "print_a_municipality: municipality");
-
-  print_header();
-  print_municipality(municipality, NULL);
-}
-
-void print_data(list_t* list) {
-  NULL_CHECK(list, "print_data: list");
-
-  putchar('\n');
-
-  if (list_is_empty(list)) {
-    puts("データが存在しません");
-  } else {
-    print_header();
-    list_for_each(list, print_municipality, NULL);
-  }
 }

@@ -30,4 +30,4 @@ graph.o: graph.c graph.h debug.h
 .PHONY: clean
 
 clean:
-	$(RM) $(TARGET){,.exe} *.o
+	$(RM) $(TARGET) $(TARGET).exe visit_table_test visit_table_test.exe *.o

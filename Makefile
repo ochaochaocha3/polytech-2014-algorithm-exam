@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -g -O0 -std=c99
+CFLAGS=-Wall -std=c99 -O2 # -g -O0
 TARGET=madmin
 
 .PHONY: all

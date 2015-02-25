@@ -14,13 +14,15 @@
 typedef struct municipality {
   int id;                                    // 固有の番号
   char name[MUNICIPALITY_NAME_SIZE];         // 自治体名
+  long population;                           // 人口
   double area;                               // 面積 [km^2]
   int adjacency_list[MUNICIPALITY_ADJ_SIZE]; // 隣接リスト
 } municipality_t;
 
 // 自治体情報を初期化する
 void municipality_init(
-  municipality_t* municipality, int id, const char* name, double area
+  municipality_t* municipality,
+  int id, const char* name, long population, double area
 );
 // 自治体情報の領域を解放する
 void municipality_free(municipality_t* municipality);
@@ -36,6 +38,12 @@ int municipality_name_equal(municipality_t* municipality, void** params);
 // 名前が大文字小文字を区別せず指定したパターンを含むかどうか
 // params[0]: char* pattern
 int municipality_name_like(municipality_t* municipality, void** params);
+// 人口が範囲内かどうか
+// params[0]: long* population_min
+// params[1]: long* populaiton_max
+int municipality_population_in_range(
+  municipality_t* municipality, void** params
+);
 // 面積が範囲内かどうか
 // params[0]: double* area_min
 // params[1]: double* area_max

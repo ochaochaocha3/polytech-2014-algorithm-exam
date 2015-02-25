@@ -23,12 +23,13 @@ typedef enum command {
 } command_t;
 
 typedef enum search_category {
-  SEARCH_BACK,         // 戻る
-  SEARCH_BY_ID,        // ID で探索
-  SEARCH_BY_NAME,      // 名称で探索
-  SEARCH_BY_NAME_LIKE, // 名称で探索（曖昧）
-  SEARCH_BY_AREA,      // 面積で探索
-  SEARCH_TOTAL         // ダミー：総数を知るために使う
+  SEARCH_BACK,          // 戻る
+  SEARCH_BY_ID,         // ID で探索
+  SEARCH_BY_NAME,       // 名称で探索
+  SEARCH_BY_NAME_LIKE,  // 曖昧な名称で探索
+  SEARCH_BY_POPULATION, // 人口で探索
+  SEARCH_BY_AREA,       // 面積で探索
+  SEARCH_TOTAL          // ダミー：総数を知るために使う
 } search_category_t;
 
 typedef enum search_and_delete_category {
@@ -74,6 +75,8 @@ municipality_t* search_by_name(list_t* list);
 // 曖昧な名称で探索する
 // SQL の LIKE に相当する
 int search_by_name_like(list_t* list);
+// 人口で探索する
+int search_by_population(list_t* list);
 // 面積で探索する
 int search_by_area(list_t* list);
 
@@ -157,7 +160,8 @@ command_t select_command(void) {
 #define INITIAL_DATA_LENGTH 23
 void add_initial_data(list_t* list) {
   // データは以下の URL から入手した
-  // http://toukei.pref.shizuoka.jp/toukeikikakuhan/data/01-040/h24_02_01.html
+  // * http://toukei.pref.shizuoka.jp/toukeikikakuhan/data/01-040/h24_02_01.html
+  // * https://toukei.pref.shizuoka.jp/jinkoushugyouhan/data/02-030/2702jinkou.html
   municipality_t* data[INITIAL_DATA_LENGTH];
   int i = 0;
 
@@ -168,132 +172,132 @@ void add_initial_data(list_t* list) {
   }
 
   i = 0;
-  municipality_init(data[i], 1,  "Shizuoka",   1411.93);
+  municipality_init(data[i], 1, "Shizuoka", 705754, 1411.93);
   data[i]->adjacency_list[0] = 19;
   data[i]->adjacency_list[1] = 20;
   data[i]->adjacency_list[2] = 21;
   data[i]->adjacency_list[3] = 22;
 
   ++i;
-  municipality_init(data[i], 2,  "Hamamatsu",  1558.04);
+  municipality_init(data[i], 2, "Hamamatsu", 705754, 1558.04);
   data[i]->adjacency_list[0] = 11;
   data[i]->adjacency_list[1] = 12;
 
   ++i;
-  municipality_init(data[i], 11, "Kosai",        86.65);
+  municipality_init(data[i], 11, "Kosai", 58656, 86.65);
   data[i]->adjacency_list[0] = 2;
 
   ++i;
-  municipality_init(data[i], 12, "Iwata",       164.08);
+  municipality_init(data[i], 12, "Iwata", 164608, 164.08);
   data[i]->adjacency_list[0] = 2;
   data[i]->adjacency_list[1] = 13;
 
   ++i;
-  municipality_init(data[i], 13, "Fukuroi",     108.56);
+  municipality_init(data[i], 13, "Fukuroi", 85151, 108.56);
   data[i]->adjacency_list[0] = 12;
   data[i]->adjacency_list[1] = 14;
 
   ++i;
-  municipality_init(data[i], 14, "Kakegawa",    265.63);
+  municipality_init(data[i], 14, "Kakegawa", 114033, 265.63);
   data[i]->adjacency_list[0] = 13;
   data[i]->adjacency_list[1] = 15;
   data[i]->adjacency_list[2] = 16;
   data[i]->adjacency_list[3] = 17;
 
   ++i;
-  municipality_init(data[i], 15, "Omaezaki",     65.86);
+  municipality_init(data[i], 15, "Omaezaki", 32727, 65.86);
   data[i]->adjacency_list[0] = 14;
   data[i]->adjacency_list[1] = 16;
   data[i]->adjacency_list[2] = 18;
 
   ++i;
-  municipality_init(data[i], 16, "Kikugawa",     94.24);
+  municipality_init(data[i], 16, "Kikugawa", 46059, 94.24);
   data[i]->adjacency_list[0] = 14;
   data[i]->adjacency_list[1] = 15;
   data[i]->adjacency_list[2] = 17;
   data[i]->adjacency_list[3] = 18;
 
   ++i;
-  municipality_init(data[i], 17, "Shimada",     315.88);
+  municipality_init(data[i], 17, "Shimada", 97941, 315.88);
   data[i]->adjacency_list[0] = 14;
   data[i]->adjacency_list[1] = 16;
   data[i]->adjacency_list[2] = 18;
   data[i]->adjacency_list[3] = 19;
 
   ++i;
-  municipality_init(data[i], 18, "Makinohara",  111.68);
+  municipality_init(data[i], 18, "Makinohara", 45829, 111.68);
   data[i]->adjacency_list[0] = 15;
   data[i]->adjacency_list[1] = 16;
   data[i]->adjacency_list[2] = 17;
 
   ++i;
-  municipality_init(data[i], 19, "Fujieda",     194.03);
+  municipality_init(data[i], 19, "Fujieda", 143451, 194.03);
   data[i]->adjacency_list[0] = 1;
   data[i]->adjacency_list[1] = 17;
   data[i]->adjacency_list[2] = 20;
 
   ++i;
-  municipality_init(data[i], 20, "Yaizu",        70.62);
+  municipality_init(data[i], 20, "Yaizu", 139269, 70.62);
   data[i]->adjacency_list[0] = 1;
   data[i]->adjacency_list[1] = 17;
 
   ++i;
-  municipality_init(data[i], 21, "Fuji",        245.02);
+  municipality_init(data[i], 21, "Fuji", 250154, 245.02);
   data[i]->adjacency_list[0] = 1;
   data[i]->adjacency_list[1] = 22;
   data[i]->adjacency_list[2] = 23;
   data[i]->adjacency_list[3] = 25;
 
   ++i;
-  municipality_init(data[i], 22, "Fujinomiya",  388.99);
+  municipality_init(data[i], 22, "Fujinomiya", 131255, 388.99);
   data[i]->adjacency_list[0] = 1;
   data[i]->adjacency_list[1] = 21;
 
   ++i;
-  municipality_init(data[i], 23, "Numazu",      187.13);
+  municipality_init(data[i], 23, "Numazu", 193232, 187.13);
   data[i]->adjacency_list[0] = 21;
   data[i]->adjacency_list[1] = 24;
   data[i]->adjacency_list[2] = 27;
 
   ++i;
-  municipality_init(data[i], 24, "Mishima",      62.13);
+  municipality_init(data[i], 24, "Mishima", 110398, 62.13);
   data[i]->adjacency_list[0] = 23;
   data[i]->adjacency_list[1] = 25;
 
   ++i;
-  municipality_init(data[i], 25, "Susono",      138.17);
+  municipality_init(data[i], 25, "Susono", 53204, 138.17);
   data[i]->adjacency_list[0] = 21;
   data[i]->adjacency_list[1] = 24;
   data[i]->adjacency_list[2] = 26;
 
   ++i;
-  municipality_init(data[i], 26, "Gotemba",     194.85);
+  municipality_init(data[i], 26, "Gotemba",  87962, 194.85);
   data[i]->adjacency_list[0] = 25;
 
   ++i;
-  municipality_init(data[i], 27, "Izunokuni",    94.71);
+  municipality_init(data[i], 27, "Izunokuni", 48672, 94.71);
   data[i]->adjacency_list[0] = 23;
   data[i]->adjacency_list[1] = 28;
   data[i]->adjacency_list[2] = 29;
 
   ++i;
-  municipality_init(data[i], 28, "Atami",        61.61);
+  municipality_init(data[i], 28, "Atami", 37474, 61.61);
   data[i]->adjacency_list[0] = 27;
   data[i]->adjacency_list[1] = 30;
 
   ++i;
-  municipality_init(data[i], 29, "Izu",         363.97);
+  municipality_init(data[i], 29, "Izu", 31622, 363.97);
   data[i]->adjacency_list[0] = 23;
   data[i]->adjacency_list[1] = 27;
   data[i]->adjacency_list[2] = 30;
 
   ++i;
-  municipality_init(data[i], 30, "Ito",         124.13);
+  municipality_init(data[i], 30, "Ito", 68992, 24.13);
   data[i]->adjacency_list[0] = 28;
   data[i]->adjacency_list[1] = 29;
 
   ++i;
-  municipality_init(data[i], 31, "Shimoda",     104.71);
+  municipality_init(data[i], 31, "Shimoda", 23265, 104.71);
 
   for (i = 0; i < INITIAL_DATA_LENGTH; ++i) {
     list_append(list, data[i]);
@@ -328,12 +332,17 @@ void append_data(list_t* list) {
   printf("名称: ");
   scanf("%s", data.name);
 
+  printf("人口: ");
+  scanf("%ld", &data.population);
+
   printf("面積 [km^2]: ");
   scanf("%lf", &data.area);
 
   new_municipality = malloc(sizeof(municipality_t));
   NULL_CHECK(new_municipality, "append_data: new_municipality");
-  municipality_init(new_municipality, data.id, data.name, data.area);
+  municipality_init(
+    new_municipality, data.id, data.name, data.population, data.area
+  );
 
   for (i = 0; i < MUNICIPALITY_ADJ_SIZE; ++i) {
     printf("隣接 ID %d (0 以下でなしに設定): ", i);
@@ -391,6 +400,9 @@ void search_data(list_t* list) {
   case SEARCH_BY_NAME_LIKE:
     search_by_name_like(list);
     break;
+  case SEARCH_BY_POPULATION:
+    search_by_population(list);
+    break;
   case SEARCH_BY_AREA:
     search_by_area(list);
     break;
@@ -403,8 +415,9 @@ search_category_t select_search_category(void) {
   int category;
 
   printf(
-    "\n[%d]ID [%d]名称 [%d]名称 (曖昧) [%d]面積 [%d]戻る\n",
-    SEARCH_BY_ID, SEARCH_BY_NAME, SEARCH_BY_NAME_LIKE, SEARCH_BY_AREA,
+    "\n[%d]ID [%d]名称 [%d]名称 (曖昧) [%d]人口 [%d]面積 [%d]戻る\n",
+    SEARCH_BY_ID, SEARCH_BY_NAME, SEARCH_BY_NAME_LIKE,
+    SEARCH_BY_POPULATION, SEARCH_BY_AREA,
     SEARCH_BACK
   );
 
@@ -576,6 +589,50 @@ int search_by_name_like(list_t* list) {
   return matched;
 }
 
+int search_by_population(list_t* list) {
+  list_t matched_list;
+  long population_min, population_max;
+  void* pred_params[2];
+  int matched;
+
+  NULL_CHECK(list, "search_by_population: list");
+
+  printf("\n人口の最小値: ");
+  scanf("%ld", &population_min);
+
+  printf("人口の最大値: ");
+  scanf("%ld", &population_max);
+
+  if (population_min > population_max) {
+    // 最小値と最大値を入れ替える
+    long population_temp;
+
+    population_temp = population_min;
+    population_min = population_max;
+    population_max = population_temp;
+
+    printf(
+      "<人口: %ld-%ld で探索します>\n",
+      population_min, population_max
+    );
+  }
+
+  pred_params[0] = (void *)&population_min;
+  pred_params[1] = (void *)&population_max;
+
+  list_init(&matched_list);
+
+  list_filter(
+    list, &matched_list, municipality_population_in_range, pred_params
+  );
+  matched = !list_is_empty(&matched_list);
+  print_data(&matched_list);
+
+  list_free(&matched_list);
+
+  return matched;
+}
+
 int search_by_area(list_t* list) {
   list_t matched_list;
   double area_min, area_max;
@@ -683,8 +740,8 @@ void print_municipality(municipality_t* value, void** params) {
   NULL_CHECK(value, "print_municipality: value");
 
   printf(
-    "%4d    %-16s    %11.2f     ",
-    value->id, value->name, value->area
+    "%4d    %-16.16s    %8ld    %12.2f     ",
+    value->id, value->name, value->population, value->area
   );
 
   for (
@@ -704,8 +761,8 @@ void print_municipality(municipality_t* value, void** params) {
 
 void print_header(void) {
   puts(
-    "  ID    名称                面積 [km^2]     隣接\n"
-    "----------------------------------------------------------"
+    "  ID    名称                    人口     面積 [km^2]     隣接\n"
+    "-----------------------------------------------------------------------"
   );
 }
 

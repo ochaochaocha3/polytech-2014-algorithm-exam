@@ -12,12 +12,14 @@
 #include "municipality.h"
 
 void municipality_init(
-  municipality_t* municipality, int id, const char* name, double area
+  municipality_t* municipality,
+  int id, const char* name, long population, double area
 ) {
   NULL_CHECK(municipality, "municipality_init: municipality");
 
   municipality->id = id;
   strncpy(municipality->name, name, MUNICIPALITY_NAME_SIZE);
+  municipality->population = population;
   municipality->area = area;
   memset(municipality->adjacency_list, 0, MUNICIPALITY_ADJ_SIZE);
 }
@@ -101,6 +103,24 @@ int municipality_name_like(municipality_t* value, void** params) {
 
   // 探索失敗
   return 0;
+}
+
+int municipality_population_in_range(
+  municipality_t* municipality, void** params
+) {
+  long population, population_min, population_max;
+
+  NULL_CHECK(
+    municipality, "municipality_population_in_range: municipality"
+  );
+  NULL_CHECK(params[0], "municipality_population_in_range: params[0]");
+  NULL_CHECK(params[1], "municipality_population_in_range: params[1]");
+
+  population = municipality->population;
+  population_min = *(long *)params[0];
+  population_max = *(long *)params[1];
+
+  return population >= population_min && population <= population_max;
 }
 
 int municipality_area_in_range(

@@ -21,8 +21,9 @@ void print_population_graph(list_t* list) {
   NULL_CHECK(list, "print_population_graph: list");
 
   puts(
+    "人口グラフ\n"
     "+/10,000 人\n"
-    "----"
+    "----------------------+"
   );
   list_for_each(list, print_population_graph_line, NULL);
 }
@@ -31,8 +32,9 @@ void print_area_graph(list_t* list) {
   NULL_CHECK(list, "print_area_graph: list");
 
   puts(
+    "面積グラフ\n"
     "+/10 km^2\n"
-    "----"
+    "----------------------+"
   );
   list_for_each(list, print_area_graph_line, NULL);
 }
@@ -45,7 +47,7 @@ static void print_population_graph_line(
 
   NULL_CHECK(municipality, "print_population_graph_line: municipality");
 
-  printf("%4d %-16.16s ", municipality->id, municipality->name);
+  printf("%4d %16.16s | ", municipality->id, municipality->name);
 
   length = municipality->population / 10000;
   for (i = 0; i < length; ++i) {
@@ -63,7 +65,7 @@ static void print_area_graph_line(
 
   NULL_CHECK(municipality, "print_area_graph_line: municipality");
 
-  printf("%4d %-16.16s ", municipality->id, municipality->name);
+  printf("%4d %16.16s | ", municipality->id, municipality->name);
 
   length = municipality->area / 10;
   for (i = 0; i < length; ++i) {
